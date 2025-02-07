@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -31,9 +32,15 @@ func DBInit() error {
 	}
 	defer client.Disconnect(context.TODO())
 
-	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Err(); err != nil {
-		panic(err)
+	for i := 0; i < 5; i++ {
+		pingStart := time.Now()
+		if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Err(); err != nil {
+			panic(err)
+		}
+		pingEnd := time.Now()
+		fmt.Println("Ping took", pingEnd.Sub(pingStart))
 	}
+
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 	return nil
 }
